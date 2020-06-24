@@ -82,3 +82,16 @@ optional arguments:
   --rna                 set if rna reads
 
 ```
+
+
+### DNA analysis
+
+#### Required programs
+* signalAlign 
+    * https://github.com/UCSC-nanopore-cgl/signalAlign: commit 3baaf3e47536278d636f74d2afadf30f1304ee4e
+* embed_fast5 
+    * https://github.com/adbailey4/embed_fast5: commit 70c7f1ff009615c9c9e2612c49909cc74a966f55
+
+
+Our final canonical dataset were 336 reads from FAB39088 and 339 reads from FAF01169. These reads covered all canonical kmers at least twice with an average of 47.35 reads covering each kmer. Our final M-C dataset were 1706 reads from FAB39088 and 1396 reads from FAF01169. These reads covered 3360 out of 3367 cytosine only kmers with an average of 101.19 reads covering each kmer. Since we were looking at kmers with only one M there are only 6144 total single M 6-mers. The 1706 methylated reads from FAB39088 covered 4200/6144 kmers with an average coverage of 5.94. The 1396 methylated reads from FAB39088 covered 4154/6144 kmers with an average coverage of 5.73. In total 4655 kmers were covered with an average coverage of 10.47.
+
