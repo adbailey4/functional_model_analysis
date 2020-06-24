@@ -19,8 +19,8 @@ from scipy.stats import norm, invgauss, entropy
 # needs pyranges "conda install -c bioconda pyranges"
 import pyranges as pr
 
-OUTPUT_DIR = "/home/ubuntu/bisulfite_methylation_analysis/positions"
-REFERENCE = "/home/ubuntu/bisulfite_methylation_analysis/ref/GRCh38_full_analysis_set_plus_decoy_hla.fa"
+OUTPUT_DIR = "/home/ubuntu/mount/download/RNA_rel2/reference"
+REFERENCE = "/home/ubuntu/mount/download/RNA_rel2/reference/gencode.v27.transcripts.fa"
 p_lambda = 50
 delta = 6
 
@@ -75,24 +75,29 @@ for transcript in transcript_strings:
     start = positions - delta
     end = positions + delta
     transcripts.extend([transcript] * len(positions))
+    strands.extend(["+"] * len(positions))
     starts.extend(list(start))
     ends.extend(list(end))
     print(transcript)
 
+print("Starting pyranges: n = {}".format(len(starts)))
 # random positions as pyranges
-canonical_positions = pr.from_dict({"Chromosome": transcripts, "Start": starts, "End": ends})
-
+# canonical_positions1 = pr.from_dict({"Chromosome": transcripts, "Start": starts, "End": ends})
+canonical_positions = pd.DataFrame.from_dict({"Chromosome": transcripts, "Start": starts, "End": ends, "Strand": strands})
+print("df")
 # remove cut off canonical ranges
-canonical_positions = canonical_positions[(canonical_positions.End - canonical_positions.Start) == (delta * 2)]
-canonical_positions = canonical_positions.df
+# canonical_positions = canonical_positions1.df
+print("get midpoint")
 # recreate original position for left over data
 canonical_positions["midpoint"] = canonical_positions.Start + delta
 # get bases for each position (all should be C but this is worth a double check)
-canonical_positions['find'] = np.vectorize(get_base)(canonical_positions['Chromosome'], canonical_positions['midpoint'], canonical_positions['Strand'])
+print("get bases")
+canonical_positions['find'] = np.vectorize(get_base)(canonical_positions['Chromosome'], canonical_positions['midpoint'])
 canonical_positions['replace'] = canonical_positions['find']
 canonical_positions['ambig'] = "X"
 canonical_positions = canonical_positions[canonical_positions["find"] != "N"]
 # output data
+print("writing to file")
 output_path = os.path.join(OUTPUT_DIR, "transcript_canonical.positions")
 ambig_output_path = os.path.join(OUTPUT_DIR, "transcript_canonical_variant.positions")
 canonical_positions.to_csv(output_path, sep="\t", index=False,
