@@ -51,16 +51,13 @@ class Kmer(object):
     def __init__(self, kmer):
         self.kmer = kmer
         self.read_indices = []
-
     def add_read_index(self, read_index):
         self.read_indices.append(read_index)
-
     def remove_read_index(self, read_index):
         for i, x in enumerate(self.read_indices):
             if x == read_index:
                 self.read_indices.pop(i)
                 break
-
     def get_read_index(self):
         if len(self.read_indices) == 0:
             return None
@@ -72,7 +69,6 @@ class Read(object):
     def __init__(self, read_id):
         self.read_id = read_id
         self.kmers = []
-
     def add_kmer(self, kmer):
         self.kmers.append(kmer)
 
@@ -85,17 +81,14 @@ class KmerMap(object):
         self.reads = []
         self.kmer_classes = {x: Kmer(x) for x in self.kmers}
         self.kmer_counts = {x: 0 for x in self.kmers}
-
     def add_read(self, read):
         read_index = len(self.reads)
         self.reads.append(read)
         for kmer in read.kmers:
             self.kmer_classes[kmer].add_read_index(read_index)
             self.kmer_counts[kmer] += 1
-
     def get_min_kmer(self):
         return min(self.kmer_counts, key=self.kmer_counts.get)
-
     def get_non_zero_min_kmer(self):
         min_count = np.inf
         return_kmer = None
@@ -104,7 +97,6 @@ class KmerMap(object):
                 min_count = count
                 return_kmer = kmer
         return return_kmer
-
     def get_non_zero_min_kmer_in_kmers(self, kmers):
         min_count = np.inf
         return_kmer = None
@@ -114,34 +106,29 @@ class KmerMap(object):
                     min_count = count
                     return_kmer = kmer
         return return_kmer
-
     def get_zero_kmers(self):
         zero_kmers = []
         for kmer, count in self.kmer_counts.items():
             if count == 0:
                 zero_kmers.append(kmer)
         return zero_kmers
-
     def remove_read(self, read_index):
         read = self.reads[read_index]
         for kmer in read.kmers:
             self.kmer_classes[kmer].remove_read_index(read_index)
             self.kmer_counts[kmer] -= 1
-
     def get_threshold_covered_kmers(self, threshold=1):
         kmers = []
         for kmer, count in self.kmer_counts.items():
             if count >= threshold:
                 kmers.append(kmer)
         return kmers
-
     def get_threshold_uncovered_kmers(self, threshold=1):
         kmers = []
         for kmer, count in self.kmer_counts.items():
             if count < threshold:
                 kmers.append(kmer)
         return kmers
-
     def get_read(self, kmer):
         read_index = self.kmer_classes[kmer].get_read_index()
         if read_index is None:
@@ -156,19 +143,37 @@ def main():
     assert os.path.exists(args.bam), "{} does not exist".format(args.bam)
     assert os.path.exists(args.positions_file), "{} does not exist".format(args.positions_file)
 
+    output_dir = args.output_dir
+    bam = args.bam
+    positions_file = args.positions_file
+    reference = args.reference
+    alphabet = args.alphabet
+    kmer_length = args.kmer_length
+
+    # output_dir = "/home/ubuntu/mount/download/FAB39088"
+    # bam = "/home/ubuntu/mount/download/FAB39088/fastq/canonical_cpg_FAB39088.2308.sorted.bam"
+    # output_dir = "/home/ubuntu/mount/download/FAF01169"
+    # bam = "/home/ubuntu/mount/download/FAF01169/Bham/fastq/canonical_cpg_FAF01169.2308.sorted.bam"
+    #
+    # positions_file = "/home/ubuntu/bisulfite_methylation_analysis/positions/canonical_added_cxx.positions"
+    # reference = "/home/ubuntu/bisulfite_methylation_analysis/ref/GRCh38_full_analysis_set_plus_decoy_hla.fa"
+    # alphabet = "ACGT"
+    # kmer_length = 6
+
     fasta_handle = None
-    if args.reference is not None:
-        assert os.path.exists(args.reference), "{} does not exist".format(args.reference)
-        fasta_handle = ReferenceHandler(args.reference)
+    if reference is not None:
+        assert os.path.exists(reference), "{} does not exist".format(reference)
+        fasta_handle = ReferenceHandler(reference)
 
     rc = ReverseComplement()
-    positions_data = pd.read_csv(args.positions_file, names=["chr", "start", "strand", "find", "replace"], sep="\t")
-    km = KmerMap(args.alphabet, args.kmer_length)
+    positions_data = pd.read_csv(positions_file, names=["chr", "start", "strand", "find", "replace"], sep="\t")
+    km = KmerMap(alphabet, kmer_length)
     counter = 0
 
-    def get_kmer(sequence, pos, start_pos, strand):
+    def get_kmer(sequence, pos, start_pos, strand, replace):
         try:
-            base = sequence[(pos - (args.kmer_length-1)) - start_pos:(pos + args.kmer_length) - start_pos]
+            base = sequence[(pos - (kmer_length-1)) - start_pos:(pos + kmer_length) - start_pos]
+            base = base[:(kmer_length-1)] + replace + base[kmer_length:]
             if strand == "-":
                 return rc.complement(base)
             return base
@@ -203,8 +208,9 @@ def main():
         kmer_lists = np.vectorize(get_kmer)(ref_sequence1,
                                             this_positions_data['start'],
                                             ref_start1,
-                                            strand1)
-        kmer_subset_lists1 = merge_lists([[kmer[i:i + args.kmer_length] for i in range(args.kmer_length) if len(kmer[i:i + args.kmer_length]) == args.kmer_length and set(kmer[i:i + args.kmer_length]) <= set(args.alphabet)] for kmer in kmer_lists])
+                                            strand1,
+                                            this_positions_data["replace"])
+        kmer_subset_lists1 = merge_lists([[kmer[i:i + kmer_length] for i in range(kmer_length) if len(kmer[i:i + kmer_length]) == kmer_length and set(kmer[i:i + kmer_length]) <= set(alphabet)] for kmer in kmer_lists])
         return read_name1, kmer_subset_lists1
 
     def meta_get_covered_kmers(positions, all_args1):
@@ -216,10 +222,8 @@ def main():
         return data_to_return
 
     all_args = []
-    with closing(pysam.AlignmentFile(args.bam, 'rb' if args.bam.endswith("bam") else 'r')) as aln:
+    with closing(pysam.AlignmentFile(bam, 'rb' if bam.endswith("bam") else 'r')) as aln:
         for aligned_segment in aln.fetch(until_eof=True):
-            if counter > 2000:
-                break
             try:
                 if not aligned_segment.has_tag('MD'):
                     if fasta_handle is None:
@@ -230,7 +234,6 @@ def main():
                                                                  stop=aligned_segment.reference_end)
                 else:
                     ref_sequence = aligned_segment.get_reference_sequence().upper()
-
                 read_name = aligned_segment.qname.split("_")[0]
                 ref_name = aligned_segment.reference_name
                 ref_start = aligned_segment.reference_start
@@ -240,18 +243,17 @@ def main():
                     strand = "-"
                 else:
                     strand = "+"
-
                 all_args.append([read_name, ref_sequence, ref_name, strand, ref_start, ref_end])
-
                 counter += 1
-
             except Exception as e:
                 print(e, file=sys.stderr)
 
-    n_processes = 4
+    n_processes = 2
     print("starting on {} reads".format(len(all_args)))
     list_of_args = [all_args[x::n_processes] for x in range(n_processes)]
     extra_args = {"positions": positions_data}
+    # data = get_covered_kmers(positions_data, *list_of_args[0][0])
+    # print(data)
     service = BasicService(meta_get_covered_kmers, service_name="multiprocess_meta_get_covered_kmers")
     total, failure, messages, output = run_service(service.run,
                                                    list_of_args,
@@ -259,6 +261,7 @@ def main():
                                                    ["all_args1"],
                                                    n_processes)
     # print(pd.concat(output, ignore_index=True))
+    km = KmerMap(alphabet, kmer_length)
 
     all_data = merge_lists(output)
     print("number of reads: ", len(all_data))
@@ -269,20 +272,27 @@ def main():
             r.add_kmer(kmer)
         km.add_read(r)
 
-    keep_kmer_map = KmerMap(args.alphabet, args.kmer_length)
+    kmer_counts_file_path = os.path.join(output_dir, "all_reads_kmer_counts.txt")
+    with open(kmer_counts_file_path, "w") as fh:
+        print("\n".join(["\t".join([kmer, str(count)]) for kmer, count in km.kmer_counts.items()]), file=fh)
+
+    keep_kmer_map = KmerMap(alphabet, kmer_length)
 
     print("number of zero covered kmers: ", len(km.get_zero_kmers()))
     curr_threshold = 1
-    find_kmers = keep_kmer_map.get_threshold_uncovered_kmers(threshold=curr_threshold)
-    iteration = 1
+    iteration = 0
     increase_threshold = True
     while increase_threshold:
+        curr_threshold += 1
+        find_kmers = keep_kmer_map.get_threshold_uncovered_kmers(threshold=curr_threshold)
         while len(find_kmers) > 0:
             print(iteration, len(find_kmers))
             next_kmer = km.get_non_zero_min_kmer_in_kmers(find_kmers)
             if next_kmer is None:
                 print("No more reads to cover found kmers: threshold {}".format(curr_threshold))
-                increase_threshold = False
+                increase_threshold = True
+                if curr_threshold >= 10:
+                    increase_threshold = False
                 break
             next_read_index, next_read = km.get_read(next_kmer)
             if next_read is None:
@@ -292,16 +302,16 @@ def main():
             km.remove_read(next_read_index)
             find_kmers = keep_kmer_map.get_threshold_uncovered_kmers(threshold=curr_threshold)
             iteration += 1
+        print("Exited first while")
         if len(find_kmers) == 0:
             print("Found reads covering all kmers at threshold {}".format(curr_threshold))
-        file_path = os.path.join(args.output_dir, "{}_reads_covering_kmers_with_threshold_{}.txt".format("all" if increase_threshold else "some", curr_threshold))
+        file_path = os.path.join(output_dir, "{}_reads_covering_kmers_with_threshold_{}.txt".format("all" if increase_threshold else "some", curr_threshold))
         with open(file_path, "w") as fh:
             print("\n".join([read.read_id for read in keep_kmer_map.reads]), file=fh)
-        kmer_counts_file_path = os.path.join(args.output_dir, "{}_kmer_counts_with_threshold_{}.txt".format("all" if increase_threshold else "some", curr_threshold))
+        kmer_counts_file_path = os.path.join(output_dir, "{}_kmer_counts_with_threshold_{}.txt".format("all" if increase_threshold else "some", curr_threshold))
         with open(kmer_counts_file_path, "w") as fh:
             print("\n".join(["\t".join([kmer, str(count)]) for kmer, count in keep_kmer_map.kmer_counts.items()]), file=fh)
 
-    curr_threshold += 1
 
 
 if __name__ == '__main__':
