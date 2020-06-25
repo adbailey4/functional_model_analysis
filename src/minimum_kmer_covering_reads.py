@@ -15,6 +15,7 @@ import numpy as np
 from argparse import ArgumentParser
 import pysam
 from contextlib import closing
+from multiprocessing import current_process
 
 from py3helpers.utils import all_string_permutations, merge_lists, time_it
 from py3helpers.seq_tools import ReferenceHandler, ReverseComplement
@@ -42,6 +43,9 @@ def parse_args():
     parser.add_argument('--reference', '-r', action='store',
                         dest='reference', required=False, type=str, default=None,
                         help="Reference if MD flag is not set in BAM")
+    parser.add_argument('--threads', '-t', action='store',
+                        dest='threads', required=False, type=int, default=2,
+                        help="number of threads")
 
     args = parser.parse_args()
     return args
@@ -137,6 +141,58 @@ class KmerMap(object):
             return read_index, self.reads[read_index]
 
 
+class BasicService2(object):
+
+    def __init__(self, function, positions_data, service_name="example_service"):
+        self.function = function
+        self.service_name = service_name
+        self.positions_data = positions_data
+
+    def run(self, work_queue, done_queue):
+
+        """
+        Service used by the multiprocess module for an example of what should be created for multiprocessing
+        :param work_queue: arguments to be done
+        :param done_queue: errors and returns to be put
+        :param service_name: name of the service
+        """
+        # prep
+        total_handled = 0
+        failure_count = 0
+
+        # catch overall exceptions
+        try:
+            for f in iter(work_queue.get, 'STOP'):
+                # catch exceptions on each element
+                try:
+                    return_value = self.function(positions=self.positions_data, **f)
+                    done_queue.put(return_value)
+                except Exception as e:
+                    # get error and log it
+                    message = "{}:{}".format(type(e), str(e))
+                    error = "{} '{}' failed with: {}".format(self.service_name, current_process().name, message)
+                    print("[{}] ".format(self.service_name) + error)
+                    done_queue.put(error)
+                    failure_count += 1
+
+                # increment total handling
+                total_handled += 1
+
+        except Exception as e:
+            # get error and log it
+            message = "{}:{}".format(type(e), str(e))
+            error = "{} '{}' critically failed with: {}".format(self.service_name, current_process().name, message)
+            print("[{}] ".format(self.service_name) + error)
+            done_queue.put(error)
+
+        finally:
+            # logging and final reporting
+            print("[%s] '%s' completed %d calls with %d failures"
+                  % (self.service_name, current_process().name, total_handled, failure_count))
+            done_queue.put("{}:{}".format("total", total_handled))
+            done_queue.put("{}:{}".format("failure", failure_count))
+
+
 def main():
     args = parse_args()
     assert os.path.isdir(args.output_dir), "{} is not a directory".format(args.output_dir)
@@ -149,7 +205,7 @@ def main():
     reference = args.reference
     alphabet = args.alphabet
     kmer_length = args.kmer_length
-
+    n_processes = args.threads
     # output_dir = "/home/ubuntu/mount/download/FAB39088"
     # bam = "/home/ubuntu/mount/download/FAB39088/fastq/canonical_cpg_FAB39088.2308.sorted.bam"
     # output_dir = "/home/ubuntu/mount/download/FAF01169"
@@ -248,16 +304,15 @@ def main():
             except Exception as e:
                 print(e, file=sys.stderr)
 
-    n_processes = 2
     print("starting on {} reads".format(len(all_args)))
     list_of_args = [all_args[x::n_processes] for x in range(n_processes)]
-    extra_args = {"positions": positions_data}
+    # extra_args = {"positions": positions_data}
     # data = get_covered_kmers(positions_data, *list_of_args[0][0])
     # print(data)
-    service = BasicService(meta_get_covered_kmers, service_name="multiprocess_meta_get_covered_kmers")
+    service = BasicService2(meta_get_covered_kmers, positions_data, service_name="multiprocess_meta_get_covered_kmers")
     total, failure, messages, output = run_service(service.run,
                                                    list_of_args,
-                                                   extra_args,
+                                                   {},
                                                    ["all_args1"],
                                                    n_processes)
     # print(pd.concat(output, ignore_index=True))

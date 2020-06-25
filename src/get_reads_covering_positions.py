@@ -37,16 +37,27 @@ def main():
     args = parse_args()
     assert os.path.exists(args.bam), "{} does not exist".format(args.bam)
     assert os.path.exists(args.positions_file), "{} does not exist".format(args.positions_file)
-    execute = "samtools view -b -o {} {}".format(args.output_file, args.bam)
-    positions = " "
+    step_size = 10000
+    step_number = 0
     with open(args.positions_file, "r") as fh:
-        for line in fh:
-            split_line = line.split()
-            chromosome = split_line[0]
-            position = split_line[1]
-            positions += chromosome+":"+position+"-"+position+" "
-    execute += positions
-    check_call(execute.split())
+        while True:
+            execute = "samtools view -b -o {} {}".format(args.output_file+str(step_number), args.bam)
+            positions = " "
+            counter = 0
+            for line in fh:
+                split_line = line.split()
+                chromosome = split_line[0]
+                position = split_line[1]
+                positions += chromosome+":"+position+"-"+position+" "
+                counter += 1
+                if counter > 10000:
+                    break
+            if positions == " " or step_number > 10:
+                break
+            execute += positions
+            check_call(execute.split())
+            step_number += 1
+
 
 if __name__ == '__main__':
     print(time_it(main)[1])
