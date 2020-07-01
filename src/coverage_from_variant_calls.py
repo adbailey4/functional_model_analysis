@@ -37,19 +37,19 @@ def main():
     VARIANT_NAMES = ["/variant_calls/variant_calls.csv", "/variant_calls/variant_calls.csv"]
     ALPHABET = "ATGC"
     KMER_LENGTH = 6
-    NAMES = ["FAB39088", "FAF01169"]
+    NAMES = ["FAB39088_canonical", "FAF01169_canonical"]
 
     # DNA mod
-    REFERENCE = "/home/ubuntu/bisulfite_methylation_analysis/ref/GRCh38_full_analysis_set_plus_decoy_hla.fa"
-    VARIANT_HOME_DIRS = ["/home/ubuntu/mount/FAB39088_runs/cpg_calling/all_runs/",
-                         "/home/ubuntu/mount/FAF01169_runs/cpg_calling/all_runs/"]
-    NAMES = ["FAB39088", "FAF01169"]
-    VARIANT_NAMES = ["/variant_calls/variant_calls.csv", "/variant_calls/variant_calls.csv"]
-    ALPHABET = "ATGCM"
-    KMER_LENGTH = 6
-    POSITIONS_FILE = "/home/ubuntu/bisulfite_methylation_analysis/positions/all_mC.positions"
-    positions_data = pd.read_csv(POSITIONS_FILE, names=["contig", "reference_index", "strand", "find", "replace"],
-                                 sep="\t")
+    # REFERENCE = "/home/ubuntu/bisulfite_methylation_analysis/ref/GRCh38_full_analysis_set_plus_decoy_hla.fa"
+    # VARIANT_HOME_DIRS = ["/home/ubuntu/mount/FAB39088_runs/cpg_calling/all_runs/",
+    #                      "/home/ubuntu/mount/FAF01169_runs/cpg_calling/all_runs/"]
+    # NAMES = ["FAB39088_methyl", "FAF01169_methyl"]
+    # VARIANT_NAMES = ["/variant_calls/variant_calls.csv", "/variant_calls/variant_calls.csv"]
+    # ALPHABET = "ATGCM"
+    # KMER_LENGTH = 6
+    # POSITIONS_FILE = "/home/ubuntu/bisulfite_methylation_analysis/positions/all_mC.positions"
+    # positions_data = pd.read_csv(POSITIONS_FILE, names=["contig", "reference_index", "strand", "find", "replace"],
+    #                              sep="\t")
     if positions_data is not False:
         i2 = positions_data.set_index(keys).index
 

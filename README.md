@@ -40,7 +40,38 @@ optional arguments:
 
 #### coverage_from_variant_calls.py
 * Get coverage from RNA canonical, DNA canonical and DNA methylation variant call files to get final kmer coverage counts.  
+* The following was used to calculate specific kmer breakdowns of the methyl kmer analysis
+```python
+file_path = "/home/ubuntu/mount/kmer_counts/FAB39088_methyl.tsv"
+file_path = "/home/ubuntu/mount/kmer_counts/FAF01169_methyl.tsv"
+file_path = "/home/ubuntu/mount/kmer_counts/FAB39088_methyl_FAF01169_methyl.tsv"
 
+with open(file_path, 'r') as fh:
+    lines = fh.readlines()
+    data = [x.rstrip().split() for x in lines]
+    m_counter = 0
+    m_counts = 0
+    m_coverage = 0 
+    c_counter = 0
+    c_counts = 0
+    c_coverage = 0 
+    
+    for x in data:
+        x_cov = float(x[1])
+        if x[0].count("M") == 1:
+            m_counter += 1
+            if x_cov > 0:
+                m_counts += 1
+                m_coverage += x_cov
+        if x[0].count("M") == 0 and x[0].count("C") >= 1:
+            c_counter += 1
+            if x_cov > 0:
+                c_counts += 1
+                c_coverage += x_cov
+    
+    print(m_counts, m_counter, m_coverage/m_counts)
+    print(c_counts, c_counter, c_coverage/c_counts)
+```
 #### get_reads_covering_positions.py
 * Simple script which selects reads which cover specific positions. This is used to narrow down the search for reads covering confident canonical and 5mC sites.
 
@@ -103,5 +134,4 @@ optional arguments:
 
 ### Summary Of Event Data
 
-Our final canonical dataset were 336 reads from FAB39088 and 339 reads from FAF01169. These reads covered all canonical kmers at least twice with an average of 47.35 reads covering each kmer. Our final M-C dataset were 1706 reads from FAB39088 and 1396 reads from FAF01169. These reads covered 3360 out of 3367 cytosine only kmers with an average of 101.19 reads covering each kmer. Since we were looking at kmers with only one M there are only 6144 total single M 6-mers. The 1706 methylated reads from FAB39088 covered 4200/6144 kmers with an average coverage of 5.94. The 1396 methylated reads from FAB39088 covered 4154/6144 kmers with an average coverage of 5.73. In total 4655 kmers were covered with an average coverage of 10.47.
-
+Considering the computational complexity of signalAlign, for selected prediction sites as mentioned above, we performed the following filtering steps on NA12878 cell line native genomic DNA and mRNA datasets to get the most efficient read sets. First, we calculated read-level kmer coverage. For example, the center T-site of DNA read CAGATTACAGA was selected for signalAlign prediction. 6mers CAGATT, AGATTA, GATTAC, ATTACA, TTACAG and TACAGA span such T-site, therefore considered as being covered. Based on such read-level kmer coverage, we iteratively selected reads containing the least frequently covered kmers, building the most efficient read sets. For canonical DNA functional analysis, our final FAB39088 set contained 336 reads, which covered 3692/4096 canonical DNA 6mers with an average 13.62x coverage. And the final FAF01169 set contained 339 reads, which covered 3717/4096 canonical DNA 6mers with an average 18.10x coverage. Combining the two sets, the total average coverage was 31.72x for 3886/4096 kmers. For M DNA functional analysis, our final FAB39088 set contained 1706 reads, which covered 2625/3367 C-only DNA 6mers with an average 61.52x coverage as negative control, and 3105/6144 single-M DNA 6mers with an average 5.01x coverage. The final FAF01169 set contained 1396 reads, which covered 2610/3367 C-only DNA 6mers with an average 63.26x coverage as negative control, and 3140/6144 single-M DNA 6mers with an average 4.76x coverage. Combining the two sets, in total 2792/3367 C-only DNA 6mers were covered with an average  58.49x coverage, and 3481/6144 single-M DNA 6mers were covered with an average 4.38x coverage. FAB39088 and FAF01169 denoted the two biological replicates of NA12878 cell line native genomic DNA sequencing experiments. For canonical RNA functional analysis, our final UBC set contained 146 reads, which covered 1024/1024 canonical RNA 5mers with an average 11.59 coverage. And the final OICR set contained 163 reads, which covered 1024/1024 canonical RNA 5mers with an average 13.13 coverage. Combining the two sets, in total 1024/1024 canonical RNA 5mers were covered with an average 24.72 coverage. UBC and OICR denote the two biological replicates of NA12878 cell line native mRNA sequencing experiments.
