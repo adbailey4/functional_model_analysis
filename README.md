@@ -34,6 +34,13 @@ optional arguments:
 
 #### create_canonical_positions.py
 * This is the script used to read in all NA12878 bisulfite sequencing data and generate corresponding confident canonical and 5mC sites.  
+
+#### create_canonical_rna_positions.py
+* This is the script used to create canonical RNA positions.  
+
+#### coverage_from_variant_calls.py
+* Get coverage from RNA canonical, DNA canonical and DNA methylation variant call files to get final kmer coverage counts.  
+
 #### get_reads_covering_positions.py
 * Simple script which selects reads which cover specific positions. This is used to narrow down the search for reads covering confident canonical and 5mC sites.
 

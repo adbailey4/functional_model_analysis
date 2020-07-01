@@ -49,14 +49,25 @@ def main():
         os.mkdir(created_models_dir)
     execute = "runSignalAlign run --config {}"
     embed_main_execute = "embed_main sa2bed -d {}/tempFiles_alignment/{}/ -a {} -o {}/{}.bed -t {} -c {} --overwrite"
+    running = True
     if args.rna:
         embed_main_execute += " --rna"
     for model in models:
         # run sa
         try:
+            running = True
             base_name = os.path.splitext(os.path.basename(model))[0]
             output_dir = os.path.join(args.output_dir, base_name)
-            if not os.path.exists(output_dir):
+            if os.path.exists(output_dir):
+                running = False
+                for x in sa_base_model["samples"]:
+                    sub_dir_path = os.path.join(output_dir, "tempFiles_alignment/"+x["name"])
+                    if os.path.exists(sub_dir_path):
+                        if len(list_dir(sub_dir_path, ext="tsv")) == 0:
+                            running = True
+                    else:
+                        running = True
+            if running:
                 sa_base_model["template_hmm_model"] = model
                 sa_base_model["output_dir"] = output_dir
                 new_model_file = os.path.join(created_models_dir, base_name+".json")
@@ -64,6 +75,7 @@ def main():
                 check_call(execute.format(new_model_file).split())
             else:
                 print(output_dir, " exists already: continuing")
+                continue
             #       run sa2bed
             variants_dir = os.path.join(output_dir, "variant_calls")
             if not os.path.exists(variants_dir):
