@@ -6,7 +6,10 @@ Information and scripts for functional analysis of kmer models
         * https://github.com/UCSC-nanopore-cgl/signalAlign: commit 3baaf3e47536278d636f74d2afadf30f1304ee4e
     * embed_fast5 
         * https://github.com/adbailey4/embed_fast5: commit 70c7f1ff009615c9c9e2612c49909cc74a966f55
-
+    * samtools
+    * minimap2
+    * bwa
+    
 * Workflow
     * [DNA Analysis](DNA.md)
     * [RNA Analysis](RNA.md)

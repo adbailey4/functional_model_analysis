@@ -12,6 +12,7 @@ import os
 from argparse import ArgumentParser
 from py3helpers.utils import list_dir, load_json, time_it, save_json
 from subprocess import check_call
+from distutils.dir_util import copy_tree
 
 
 def parse_args():
@@ -31,6 +32,10 @@ def parse_args():
                         help="variants to analyze")
     parser.add_argument('--rna', action='store_true', dest='rna',
                         help="set if rna reads")
+    parser.add_argument('--original_fast5_dir', action='store', dest='original_fast5_dir',
+                        help="original fast5 directory", default=None)
+    parser.add_argument('--target_fast5_dir', action='store', dest='target_fast5_dir',
+                        help="target fast5 directory", default=None)
 
     args = parser.parse_args()
     return args
@@ -42,6 +47,12 @@ def main():
     assert os.path.isdir(args.dir), "{} is not a directory".format(args.dir)
     assert os.path.isdir(args.output_dir), "{} is not a directory".format(args.output_dir)
     assert os.path.exists(args.base_model), "{} does not exist".format(args.base_model)
+    if args.original_fast5_dir or args.target_fast5_dir:
+        assert args.original_fast5_dir and args.target_fast5_dir, \
+            "Both args.original_fast5_dir and args.target_fast5_dir must be specified if one is specified"
+        assert os.path.isdir(args.original_fast5_dir), "{} is not a directory".format(args.original_fast5_dir)
+        assert os.path.isdir(args.target_fast5_dir), "{} is not a directory".format(args.target_fast5_dir)
+
     models = list_dir(args.dir, ext="model")
     sa_base_model = load_json(args.base_model)
     created_models_dir = os.path.join(args.output_dir, "created_models")
@@ -53,6 +64,10 @@ def main():
     if args.rna:
         embed_main_execute += " --rna"
     for model in models:
+        # copy subdirectory example
+        if args.original_fast5_dir and args.target_fast5_dir:
+            print("Copy fast5s from original dir to target dir")
+            copy_tree(args.original_fast5_dir, args.target_fast5_dir)
         # run sa
         try:
             running = True
@@ -82,6 +97,7 @@ def main():
                 os.mkdir(variants_dir)
             for sample in sa_base_model["samples"]:
                 check_call(embed_main_execute.format(output_dir, sample["name"], sa_base_model["ambig_model"], variants_dir, sample["name"], sa_base_model["job_count"], args.variants).split())
+
         except Exception as e:
             print(e)
             continue
