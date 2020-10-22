@@ -61,7 +61,7 @@ def convert_csv_to_sa_model(csv_file, output_dir, transition_probs, state_number
 
         # line 2 Event Model
         for kmer in new_kmers:
-            k_index = HmmModel._get_kmer_index(kmer, alphabet, kmer_length, alphabet_size)
+            # k_index = HmmModel._get_kmer_index(kmer, alphabet, kmer_length, alphabet_size)
             kmer_data = data[data["kmer"] == kmer]
             assert kmer == kmer_data["kmer"].iloc[0], "The input csv model is not sorted or something else is very wrong. Check inputs"
             f.write("{level_mean}\t{level_sd}\t{noise_mean}\t{noise_sd}\t{noise_lambda}\t"
