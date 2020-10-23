@@ -41,6 +41,23 @@ optional arguments:
 #### create_canonical_rna_positions.py
 * This is the script used to create canonical RNA positions.  
 
+#### kmer_breakdown_of_positions_file.py
+* Script to determine kmer counts and totals of a positions file of M and C positions
+
+```
+Write kmer breakdown by position given a positions file and reference
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --reference REFERENCE, -r REFERENCE
+                        Path to reference
+  --positions_file POSITIONS_FILE, -p POSITIONS_FILE
+                        Path to positions_file
+  --output_dir OUTPUT_DIR, -o OUTPUT_DIR
+                        Path to output directory
+
+```
+
 #### coverage_from_variant_calls.py
 * Get coverage from RNA canonical, DNA canonical and DNA methylation variant call files to get final kmer coverage counts.  
 * The following was used to calculate specific kmer breakdowns of the methyl kmer analysis
