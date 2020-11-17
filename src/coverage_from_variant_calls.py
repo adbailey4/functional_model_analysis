@@ -62,7 +62,9 @@ def main():
     for home_dir, variant_name in zip(VARIANT_HOME_DIRS, VARIANT_NAMES):
         assert os.path.isdir(home_dir), "{} is not a directory".format(home_dir)
         home_dir_paths = os.listdir(home_dir)
-        tmp_paths = [home_dir + x + variant_name for x in home_dir_paths if os.path.exists(home_dir + x + variant_name)]
+        tmp_paths = [os.path.join(home_dir, x, variant_name) for x in home_dir_paths if
+                     os.path.exists(os.path.join(home_dir, x, variant_name))]
+
         assert len(tmp_paths) > 0, "Check inputs, there are no paths which exist: {}".format(home_dir)
         paths.append(tmp_paths)
 
