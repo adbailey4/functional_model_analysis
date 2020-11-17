@@ -26,7 +26,7 @@
 
 * FAB39088
 
-    * split_multi_fast5 --fast5_dir /home/ubuntu/mount/download/FAB39088/Notts/FAB39088-288418386_Multi --output_dir /home/ubuntu/mount/download/FAB39088/fast5/ -j 8
+    * embed_main split_multi_fast5 --fast5_dir /home/ubuntu/mount/download/FAB39088/Notts/FAB39088-288418386_Multi --output_dir /home/ubuntu/mount/download/FAB39088/fast5/ -j 8
     * embed_main index -d /home/ubuntu/mount/download/FAB39088/fast5/  /home/ubuntu/mount/download/FAB39088/fastq/FAB39088.fastq
     * minimap2 --MD -t 18 -ax map-ont /home/ubuntu/bisulfite_methylation_analysis/ref/GRCh38_full_analysis_set_plus_decoy_hla.fa /home/ubuntu/mount/download/FAB39088/fastq/FAB39088.fastq | samtools view -@ 10 -bS - | samtools sort -@ 10 - > /home/ubuntu/mount/download/FAB39088/fastq/FAB39088.sorted.bam && samtools view -@ 40 -bSF 2308 /home/ubuntu/mount/download/FAB39088/fastq/FAB39088.sorted.bam > /home/ubuntu/mount/download/FAB39088/fastq/FAB39088.2308.sorted.bam && samtools index /home/ubuntu/mount/download/FAB39088/fastq/FAB39088.2308.sorted.bam
     * python /home/ubuntu/bisulfite_methylation_analysis/all_model_testing/get_reads_covering_positions.py --bam /home/ubuntu/mount/download/FAB39088/fastq/FAB39088.2308.sorted.bam --positions_file /home/ubuntu/bisulfite_methylation_analysis/positions/canonical_cpg.positions --output_file /home/ubuntu/mount/download/FAB39088/fastq/canonical_cpg_FAB39088.2308.sorted.bam
