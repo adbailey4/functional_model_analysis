@@ -14,6 +14,9 @@ Information and scripts for functional analysis of kmer models
     * [DNA Analysis](DNA.md)
     * [RNA Analysis](RNA.md)
 
+#### Docker
+* The most accurate way to reproduce results is to use the docker image adbailey4/signalalign@sha256:a350ce89a00e23b96f2224a0ca8fc84e53ba7d44fde2c75331218c73b4833b1a for your analysis
+* All final signalAlign runs were submitted through a kubernetes cluster using the job configs and bash scripts located in [mc_calling_multiple_models](mc_calling_multiple_models) and [run_dna_canonical](run_dna_canonical) 
 
 ## Scripts
 #### convert_csv_to_signalalign.py
