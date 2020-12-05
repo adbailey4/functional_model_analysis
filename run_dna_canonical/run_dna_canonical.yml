@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: andrewbailey-50-null-models-$TS
+  name: andrewbailey-dna-canonical-base-run-1-$TS
 spec:
   ttlSecondsAfterFinished: 6000
   template:
@@ -26,9 +26,9 @@ spec:
           image: adbailey4/signalalign@sha256:a350ce89a00e23b96f2224a0ca8fc84e53ba7d44fde2c75331218c73b4833b1a
           env:
             - name: MODELS_BUCKET
-              value: "bailey-k8s/functional_model_analysis/canonical_dna_calling_runs/"
+              value: "bailey-k8s/functional_model_analysis/canonical_dna_calling_runs/dna_native_r9.4_native-base_run-1_model/models/"
             - name: OUTPUT_BUCKET
-              value: "bailey-k8s/functional_model_analysis/canonical_dna_calling_runs/"
+              value: "bailey-k8s/functional_model_analysis/canonical_dna_calling_runs/dna_native_r9.4_native-base_run-1_model/output/"
             - name: N_THREADS
               value: "12"
           command:
@@ -39,9 +39,8 @@ spec:
               DEBIAN_FRONTEND=noninteractive apt-get update
               DEBIAN_FRONTEND=noninteractive apt-get install -y awscli
               #             download data
-              aws s3 sync --no-progress s3://bailey-k8s/methyl_calling_data/ .
-              # aws s3 cp --no-progress s3://bailey-k8s/methyl_calling_data/run_multiple_sa.sh .
-              bash run_multiple_sa.sh "$(MODELS_BUCKET)" "$(N_THREADS)" "$(OUTPUT_BUCKET)"
+              aws s3 sync --no-progress s3://bailey-k8s/functional_model_analysis/canonical_dna_calling_data/ .
+              bash run_dna_canonical.sh "$(MODELS_BUCKET)" "$(N_THREADS)" "$(OUTPUT_BUCKET)"
               echo DONE
           volumeMounts:
             - mountPath: /root/.aws
