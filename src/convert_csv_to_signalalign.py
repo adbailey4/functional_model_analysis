@@ -40,7 +40,7 @@ def parse_args():
     return args
 
 
-def convert_csv_to_sa_model(csv_file, output_dir, transition_probs, state_number=3):
+def convert_csv_to_sa_model(csv_file, output_dir, transition_probs, state_number=3, rna=False):
     output_path = os.path.join(output_dir, os.path.splitext(os.path.basename(csv_file))[0]+".model")
     data = pd.read_csv(csv_file, names=["kmer", "mean", "sd"])
     alphabet = "".join(sorted(set("".join(data["kmer"]))))
@@ -62,6 +62,8 @@ def convert_csv_to_sa_model(csv_file, output_dir, transition_probs, state_number
         # line 2 Event Model
         for kmer in new_kmers:
             # k_index = HmmModel._get_kmer_index(kmer, alphabet, kmer_length, alphabet_size)
+            if rna:
+                kmer = kmer[::-1]
             kmer_data = data[data["kmer"] == kmer]
             assert kmer == kmer_data["kmer"].iloc[0], "The input csv model is not sorted or something else is very wrong. Check inputs"
             f.write("{level_mean}\t{level_sd}\t{noise_mean}\t{noise_sd}\t{noise_lambda}\t"
@@ -86,7 +88,8 @@ def main():
 
     extra_args = {"output_dir": args.output_dir,
                   "transition_probs": transition_probs,
-                  "state_number": 3}
+                  "state_number": 3,
+                  "rna": args.rna}
     service = BasicService(convert_csv_to_sa_model, service_name="multiprocess_convert_csv_to_sa_model")
     total, failure, messages, output = run_service(service.run, csv_files,
                                                    extra_args, ["csv_file"], args.num_threads)

@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: andrewbailey-dna-canonical-base-run-1-$TS
+  name: andrewbailey-dna-canonical-downsample-run-1-$TS
 spec:
   ttlSecondsAfterFinished: 6000
   template:
@@ -26,9 +26,9 @@ spec:
           image: adbailey4/signalalign@sha256:a350ce89a00e23b96f2224a0ca8fc84e53ba7d44fde2c75331218c73b4833b1a
           env:
             - name: MODELS_BUCKET
-              value: "bailey-k8s/functional_model_analysis/canonical_dna_calling_runs/dna_native_r9.4_native-base_run-1_model/models/"
+              value: "bailey-k8s/functional_model_analysis/canonical_dna_calling_runs/dna_native_r9.4_native-down-sample_run-1_model/models/"
             - name: OUTPUT_BUCKET
-              value: "bailey-k8s/functional_model_analysis/canonical_dna_calling_runs/dna_native_r9.4_native-base_run-1_model/output/"
+              value: "bailey-k8s/functional_model_analysis/canonical_dna_calling_runs/dna_native_r9.4_native-down-sample_run-1_model/output/"
             - name: N_THREADS
               value: "12"
           command:
