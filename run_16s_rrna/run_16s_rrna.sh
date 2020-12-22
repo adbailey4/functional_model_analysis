@@ -100,7 +100,7 @@ echo "Running SignalAlign"
 runSignalAlign.py run --config config.json
 mkdir /data/sa_analysis/output/variant_calls
 echo "Running sa2bed"
-embed_main sa2bed -d /data/sa_analysis/output/tempFiles_alignment/ecoli_16S/ -a /data/reference/ambig_chars.model -o /data/sa_analysis/output/variant_calls/ecoli_16S_"$1".bed -t "$2" -c EF --overwrite
+embed_main sa2bed -d /data/sa_analysis/output/tempFiles_alignment/ecoli_16S/ -a /data/reference/ambig_chars.model -o /data/sa_analysis/output/variant_calls/ecoli_16S_"$1".bed -t "$2" -c EF --overwrite --rna
 rm config.json
 }
 
