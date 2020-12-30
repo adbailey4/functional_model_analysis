@@ -20,9 +20,9 @@
    assert os.path.exists(rrna_16S_stats)
    ts = tombo_stats.TomboStats(rrna_16S_stats)
    for contig in ts:
-   all_data = contig[4]
-   position_fraction_modified = {x[2]: x[0] for x in all_data}
-   break
+      all_data = contig[4]
+      position_fraction_modified = {x[2]: x[0] for x in all_data}
+      break
 
    ecoli = ReferenceHandler("/Users/andrewbailey/CLionProjects/functional_model_analysis/run_16s_rrna/baseline_model/temp/J01859.1.fa")
    # https://www.ncbi.nlm.nih.gov/nuccore/J01859
