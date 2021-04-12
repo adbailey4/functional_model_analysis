@@ -13,6 +13,7 @@ main() {
 }
 
 download_files() {
+  cwd=$(pwd)
   echo "Extract Files"
   tar -xzf FAB39088/FAB39088_mc_not_cpg_fast5.tar.gz -C FAB39088/ && rm FAB39088/FAB39088_mc_not_cpg_fast5.tar.gz
   echo "FAB39088 Done"
