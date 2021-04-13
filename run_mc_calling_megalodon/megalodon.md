@@ -55,25 +55,11 @@ megalodon /home/ubuntu/predictive_analysis/dna_megalodon/new_split/FAF01169/spli
 megalodon /home/ubuntu/predictive_analysis/dna_megalodon/new_split/FAB39088/split_fast5 \
 --outputs mod_mappings mods \
 --reference /home/ubuntu/predictive_analysis/dna_megalodon/data/GRCh38_full_analysis_set_plus_decoy_hla.fa \
---processes 96 --overwrite --guppy-server-path guppy_basecall_server \
---output-directory /home/ubuntu/predictive_analysis/dna_megalodon/new_split/FAB39088/megalodon_output
+--processes 1 --overwrite --guppy-server-path guppy_basecall_server \
+--output-directory /home/ubuntu/predictive_analysis/dna_megalodon/new_split/FAB39088/megalodon_output \
+--guppy-timeout 1000 --guppy-concurrent-reads 1 --guppy-params "--num_callers 7 --cpu_threads_per_caller 10 --chunks_per_runner 100"
 
 megalodon_extras per_read_text modified_bases .
-
-#### Local Calling
-Local calling on my own GPU requires more CPU memory for loading the reference and decreasing the GPU memory footprint
-
-megalodon /home/bailey/data/new_split/FAF01169/split_fast5 \
---outputs mod_mappings mods \
---reference /home/bailey/data/GRCh38_full_analysis_set_plus_decoy_hla.fa \
---devices cuda:0 --processes 1  --overwrite --guppy-server-path guppy_basecall_server \
---output-directory /home/bailey/data/new_split/FAF01169/megalodon_output \
---guppy-timeout 500 --guppy-concurrent-reads 1 --guppy-config dna_r9.4.1_450bps_modbases_5mc_hac.cfg \
---guppy-params "--gpu_runners_per_device 1 --chunks_per_runner 1"
-
-
-
-
 
 
 ### Convert text outputs to same format as our other callers
