@@ -1,0 +1,62 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: andrewbailey-dna-canonical-downsample-run-1-$TS
+spec:
+  ttlSecondsAfterFinished: 6000
+  template:
+    spec:
+#      template:
+#        metadata: # Apply a lable saying that we use NUMA node 0
+#          labels:
+#            usesnuma0: "Yes"
+#      affinity: # Say that we should not schedule on the same node as any other pod with that label
+#        podAntiAffinity:
+#          requiredDuringSchedulingIgnoredDuringExecution:
+#            - labelSelector:
+#                matchExpressions:
+#                  - key: usesnuma0
+#                    operator: In
+#                    values:
+#                      - "Yes"
+#              topologyKey: "kubernetes.io/hostname"
+      containers:
+        - name: main
+          imagePullPolicy: Always
+          image: adbailey4/signalalign@sha256:a350ce89a00e23b96f2224a0ca8fc84e53ba7d44fde2c75331218c73b4833b1a
+          env:
+            - name: MODELS_BUCKET
+              value: "bailey-k8s/functional_model_analysis/canonical_dna_calling_runs/dna_native_r9.4_native-down-sample_run-1_model/models/"
+            - name: OUTPUT_BUCKET
+              value: "bailey-k8s/functional_model_analysis/canonical_dna_calling_runs/dna_native_r9.4_native-down-sample_run-1_model/output/"
+            - name: N_THREADS
+              value: "12"
+          command:
+            - /bin/bash
+            - -c
+            - |
+              set -e
+              DEBIAN_FRONTEND=noninteractive apt-get update
+              DEBIAN_FRONTEND=noninteractive apt-get install -y awscli
+              #             download data
+              aws s3 sync --no-progress s3://bailey-k8s/functional_model_analysis/canonical_dna_calling_data/ .
+              bash run_dna_canonical.sh "$(MODELS_BUCKET)" "$(N_THREADS)" "$(OUTPUT_BUCKET)"
+              echo DONE
+          volumeMounts:
+            - mountPath: /root/.aws
+              name: s3-credentials
+            - mountPath: /data
+              name: scratch-volume
+          resources:
+            limits:
+              cpu: 12
+              memory: "100Gi"
+              ephemeral-storage: "100Gi"
+      restartPolicy: Never
+      volumes:
+        - name: scratch-volume
+          emptyDir: { }
+        - name: s3-credentials
+          secret:
+            secretName: shared-s3-credentials
+  backoffLimit: 0
