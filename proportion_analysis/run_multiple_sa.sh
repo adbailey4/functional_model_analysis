@@ -15,12 +15,10 @@ main() {
 download_files() {
   cwd=$(pwd)
   echo "Extract Files"
-  tar -xzf FAB39088.tar.gz -C FAB39088/ && rm FAB39088.tar.gz
+  tar -xzf FAB39088.tar.gz && rm FAB39088.tar.gz
   echo "FAB39088 Done"
-  tar -xzf FAF01169.tar.gz -C FAF01169/ && rm FAF01169.tar.gz
+  tar -xzf FAF01169.tar.gz && rm FAF01169.tar.gz
   echo "FAF01169 Done"
-  tar -xzf ref.tar.gz && rm ref.tar.gz
-  echo "ref Done"
   sed -i 's='/data/'='$cwd/'=g' "$cwd"/FAB39088/FAB39088.readdb
   sed -i 's='/data/'='$cwd/'=g' "$cwd"/FAF01169/FAF01169.readdb
 }

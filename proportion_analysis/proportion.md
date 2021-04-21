@@ -32,7 +32,7 @@ python /home/ubuntu/functional_model_analysis/src/get_reads_covering_positions.p
 * Select top N most covered positions for each fraction
 
 ```
-python /home/ubuntu/functional_model_analysis/proportion_analysis/top_n_most_covered_positions.py --bam /home/ubuntu/bisulfite_methylation_analysis/fastq/FAB39088_filtered_chr1_all.sorted.bam --positions_file /home/ubuntu/bisulfite_methylation_analysis/positions/filtered_chr1_10_variant.positions --output_dir /home/ubuntu/bisulfite_methylation_analysis/filtered_positions -n 100 --positions_directory /home/ubuntu/bisulfite_methylation_analysis/variant_positions
+python /home/ubuntu/functional_model_analysis/proportion_analysis/top_n_most_covered_positions.py --bam /home/ubuntu/bisulfite_methylation_analysis/fastq/FAB39088_filtered_chr1_all.sorted.bam --output_dir /home/ubuntu/bisulfite_methylation_analysis/filtered_positions -n 100 --positions_directory /home/ubuntu/bisulfite_methylation_analysis/variant_positions
 ```
 * Select reads covering those positions
 
@@ -55,5 +55,5 @@ sed -i 's='/home/ubuntu/predictive_analysis/dna_megalodon/data/all_data/Notts/FA
 sed -i 's='/home/ubuntu/predictive_analysis/dna_megalodon/data/all_data/Bham/FAF01169_split_fast5/.*/'='/data/FAF01169/fast5/'=g' /home/ubuntu/bisulfite_methylation_analysis/data/FAF01169/FAF01169.readdb
 ```
 
-
+* Run signalalign using `run_multiple_sa.sh` and `proportion_job.yml`. See Makefile: prop.
 
