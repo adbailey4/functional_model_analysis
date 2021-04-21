@@ -8,3 +8,8 @@ rdc:
 	# Run a kubernetes job with our image, prefix with USERNAME and timestamp
 	TS=`date +"%Y%m%d-%H%M%S"` envsubst < run_dna_canonical/run_dna_canonical.yml | kubectl create -f -
 
+proportion:
+	aws s3 cp proportion_analysis/run_multiple_sa.sh s3://bailey-k8s/functional_model_analysis/proportional_mc_data/
+	# Run a kubernetes job with our image, prefix with USERNAME and timestamp
+	TS=`date +"%Y%m%d-%H%M%S"` envsubst < proportion_analysis/proportion_job.yml | kubectl create -f -
+

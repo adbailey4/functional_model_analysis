@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Create a positions file from reference for calling variants. Give assurances on gap size"""
+"""Create a positions file from reference for calling variants"""
 ########################################################################
 # File: create_proportion_analysis_positions.py
 #  executable: create_proportion_analysis_positions.py
