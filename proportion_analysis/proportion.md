@@ -24,36 +24,10 @@ python create_proportion_analysis_positions.py
 ```
 minimap2 --MD -t 40 -ax map-ont /home/ubuntu/bisulfite_methylation_analysis/ref/GRCh38_full_analysis_set_plus_decoy_hla.fa /home/ubuntu/bisulfite_methylation_analysis/fastq/FAB39088.fastq | samtools view -@ 8 -bS - | samtools sort -@ 8 - > /home/ubuntu/bisulfite_methylation_analysis/fastq/FAB39088.sorted.bam && samtools view -@ 8 -bSF 2308 /home/ubuntu/bisulfite_methylation_analysis/fastq/FAB39088.sorted.bam > /home/ubuntu/bisulfite_methylation_analysis/fastq/FAB39088.2308.sorted.bam && samtools index /home/ubuntu/bisulfite_methylation_analysis/fastq/FAB39088.2308.sorted.bam
 minimap2 --MD -t 40 -ax map-ont /home/ubuntu/bisulfite_methylation_analysis/ref/GRCh38_full_analysis_set_plus_decoy_hla.fa /home/ubuntu/bisulfite_methylation_analysis/fastq/FAF01169.fastq | samtools view -@ 8 -bS - | samtools sort -@ 8 - > /home/ubuntu/bisulfite_methylation_analysis/fastq/FAF01169.sorted.bam && samtools view -@ 8 -bSF 2308 /home/ubuntu/bisulfite_methylation_analysis/fastq/FAF01169.sorted.bam > /home/ubuntu/bisulfite_methylation_analysis/fastq/FAF01169.2308.sorted.bam && samtools index /home/ubuntu/bisulfite_methylation_analysis/fastq/FAF01169.2308.sorted.bam
-
-python /home/ubuntu/functional_model_analysis/src/get_reads_covering_positions.py --bam /home/ubuntu/bisulfite_methylation_analysis/fastq/FAF01169.2308.sorted.bam --positions_file /home/ubuntu/bisulfite_methylation_analysis/positions/filtered_chr1_all.positions --output_file /home/ubuntu/bisulfite_methylation_analysis/fastq/FAF01169_filtered_chr1_all.bam
-python /home/ubuntu/functional_model_analysis/src/get_reads_covering_positions.py --bam /home/ubuntu/bisulfite_methylation_analysis/fastq/FAB39088.2308.sorted.bam --positions_file /home/ubuntu/bisulfite_methylation_analysis/positions/filtered_chr1_all.positions --output_file /home/ubuntu/bisulfite_methylation_analysis/fastq/FAB39088_filtered_chr1_all.bam
 ```
 
-* Select top N most covered positions for each fraction
-
-```
-python /home/ubuntu/functional_model_analysis/proportion_analysis/top_n_most_covered_positions.py --bam /home/ubuntu/bisulfite_methylation_analysis/fastq/FAB39088_filtered_chr1_all.sorted.bam --output_dir /home/ubuntu/bisulfite_methylation_analysis/filtered_positions -n 100 --positions_directory /home/ubuntu/bisulfite_methylation_analysis/variant_positions
-```
-* Select reads covering those positions
-
-```
-cat top_100_covered_filtered_chr1_* > top_100_chr1_variant.positions
-python /home/ubuntu/functional_model_analysis/src/get_reads_covering_positions.py --bam /home/ubuntu/bisulfite_methylation_analysis/fastq/FAF01169.2308.sorted.bam --positions_file /home/ubuntu/bisulfite_methylation_analysis/filtered_positions/top_100_chr1_variant.positions --output_file /home/ubuntu/bisulfite_methylation_analysis/data/FAF01169/FAF01169_top_100_chr1_variant.bam && mv /home/ubuntu/bisulfite_methylation_analysis/data/FAF01169/FAF01169_top_100_chr1_variant.bam0 /home/ubuntu/bisulfite_methylation_analysis/data/FAF01169/FAF01169_top_100_chr1_variant.bam
-python /home/ubuntu/functional_model_analysis/src/get_reads_covering_positions.py --bam /home/ubuntu/bisulfite_methylation_analysis/fastq/FAB39088.2308.sorted.bam --positions_file /home/ubuntu/bisulfite_methylation_analysis/filtered_positions/top_100_chr1_variant.positions --output_file /home/ubuntu/bisulfite_methylation_analysis/data/FAB39088/FAB39088_top_100_chr1_variant.bam && mv /home/ubuntu/bisulfite_methylation_analysis/data/FAB39088/FAB39088_top_100_chr1_variant.bam0 /home/ubuntu/bisulfite_methylation_analysis/data/FAB39088/FAB39088_top_100_chr1_variant.bam
-```
-
-* Prep Data for SignalAlign
-
-```
-samtools view /home/ubuntu/bisulfite_methylation_analysis/data/FAF01169/FAF01169_top_100_chr1_variant.bam | awk '{print $1}' > /home/ubuntu/bisulfite_methylation_analysis/data/FAF01169/FAF01169_top_100_chr1_variant_readids.txt
-samtools view /home/ubuntu/bisulfite_methylation_analysis/data/FAB39088/FAB39088_top_100_chr1_variant.bam | awk '{print $1}' > /home/ubuntu/bisulfite_methylation_analysis/data/FAB39088/FAB39088_top_100_chr1_variant_readids.txt
-grep -f /home/ubuntu/bisulfite_methylation_analysis/data/FAF01169/FAF01169_top_100_chr1_variant_readids.txt /home/ubuntu/bisulfite_methylation_analysis/fastq/FAF01169.fastq.index.readdb | grep fast5 > /home/ubuntu/bisulfite_methylation_analysis/data/FAF01169/FAF01169.readdb
-grep -f /home/ubuntu/bisulfite_methylation_analysis/data/FAB39088/FAB39088_top_100_chr1_variant_readids.txt /home/ubuntu/bisulfite_methylation_analysis/fastq/FAB39088.fastq.index.readdb | grep fast5 > /home/ubuntu/bisulfite_methylation_analysis/data/FAB39088/FAB39088.readdb
-awk '{print $2}' /home/ubuntu/bisulfite_methylation_analysis/data/FAB39088/FAB39088.readdb | xargs -I{} cp {} /home/ubuntu/bisulfite_methylation_analysis/data/FAB39088/fast5
-awk '{print $2}' /home/ubuntu/bisulfite_methylation_analysis/data/FAF01169/FAF01169.readdb | xargs -I{} cp {} /home/ubuntu/bisulfite_methylation_analysis/data/FAF01169/fast5
-sed -i 's='/home/ubuntu/predictive_analysis/dna_megalodon/data/all_data/Notts/FAB39088_split_fast5/.*/'='/data/FAB39088/fast5/'=g' /home/ubuntu/bisulfite_methylation_analysis/data/FAB39088/FAB39088.readdb
-sed -i 's='/home/ubuntu/predictive_analysis/dna_megalodon/data/all_data/Bham/FAF01169_split_fast5/.*/'='/data/FAF01169/fast5/'=g' /home/ubuntu/bisulfite_methylation_analysis/data/FAF01169/FAF01169.readdb
-```
-
+* prep and upload SA data 
+  ```bash /home/ubuntu/functional_model_analysis/proportion_analysis/prep_data.sh```
+  
 * Run signalalign using `run_multiple_sa.sh` and `proportion_job.yml`. See Makefile: prop.
 

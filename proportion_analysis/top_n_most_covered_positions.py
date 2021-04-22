@@ -25,7 +25,7 @@ def parse_args():
                         dest='bam', required=True, type=str, default=None,
                         help="Path to bam file")
     parser.add_argument('--positions_file', '-p', action='store',
-                        dest='positions_file', required=True, type=str, default=None,
+                        dest='positions_file', required=False, type=str, default=None,
                         help="Path to positions_file")
     parser.add_argument('--output_dir', '-o', action='store',
                         dest='output_dir', required=True, type=str, default=None,
@@ -47,7 +47,7 @@ class WriteTopN(object):
         self.alignment_handle = pysam.AlignmentFile(self.bam_file, "rb")
 
     def get_coverage(self, chr, start):
-        return np.sum([x[0] for x in self.alignment_handle.count_coverage(chr, start, start+1)])
+        return np.sum([x[0] for x in self.alignment_handle.count_coverage(chr, start, start+1, quality_threshold=0)])
 
     def write_top_n_covered_positions_file(self, positions_file, output_dir, n):
         output_path = os.path.join(output_dir, f"top_{n}_covered_{os.path.basename(positions_file)}")
@@ -79,6 +79,7 @@ def main():
     if args.positions_directory is not None:
         assert os.path.exists(args.positions_directory), "{} does not exist".format(args.positions_file)
     else:
+        assert args.positions_file is not None, "Must pass in --positions_file or --positions_directory"
         assert os.path.exists(args.positions_file), "{} does not exist".format(args.positions_file)
     output_dir = args.output_dir
     if not os.path.exists(output_dir):

@@ -41,7 +41,8 @@ def main():
     step_number = 0
     with open(args.positions_file, "r") as fh:
         while True:
-            execute = "samtools view -b -o {} {}".format(args.output_file+str(step_number), args.bam)
+            out_name = args.output_file+str(step_number)+"tmp"
+            execute = "samtools view -b -o {} {}".format(out_name, args.bam)
             positions = " "
             counter = 0
             for line in fh:
@@ -56,6 +57,8 @@ def main():
                 break
             execute += positions
             check_call(execute.split())
+            check_call(f"samtools rmdup -s {out_name} {args.output_file+str(step_number)}".split())
+            os.remove(out_name)
             step_number += 1
 
 
