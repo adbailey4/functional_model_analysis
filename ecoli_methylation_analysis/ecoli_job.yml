@@ -1,0 +1,49 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: andrewbailey-ecoli-baseline-$TS
+spec:
+  ttlSecondsAfterFinished: 6000
+  template:
+    spec:
+      containers:
+        - name: main
+          imagePullPolicy: Always
+          image: adbailey4/signalalign@sha256:a350ce89a00e23b96f2224a0ca8fc84e53ba7d44fde2c75331218c73b4833b1a
+          env:
+            - name: MODELS_BUCKET
+              value: "bailey-k8s/functional_model_analysis/ecoli_methylation_runs/nanopolish_baseline/models/"
+            - name: OUTPUT_BUCKET
+              value: "bailey-k8s/functional_model_analysis/ecoli_methylation_runs/nanopolish_baseline/output/"
+            - name: N_THREADS
+              value: "12"
+          command:
+            - /bin/bash
+            - -c
+            - |
+              set -e
+              DEBIAN_FRONTEND=noninteractive apt-get update
+              DEBIAN_FRONTEND=noninteractive apt-get install -y awscli
+              #             download data
+              aws s3 sync --no-progress s3://bailey-k8s/functional_model_analysis/ecoli_methylation/ .
+              # aws s3 cp --no-progress s3://bailey-k8s/functional_model_analysis/proportional_mc_data/run_multiple_sa.sh .
+              bash run_multiple_sa.sh "$(MODELS_BUCKET)" "$(N_THREADS)" "$(OUTPUT_BUCKET)"
+              echo DONE
+          volumeMounts:
+            - mountPath: /root/.aws
+              name: s3-credentials
+            - mountPath: /data
+              name: scratch-volume
+          resources:
+            limits:
+              cpu: 12
+              memory: "100Gi"
+              ephemeral-storage: "100Gi"
+      restartPolicy: Never
+      volumes:
+        - name: scratch-volume
+          emptyDir: { }
+        - name: s3-credentials
+          secret:
+            secretName: shared-s3-credentials
+  backoffLimit: 0

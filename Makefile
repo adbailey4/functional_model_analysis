@@ -13,3 +13,8 @@ prop:
 	# Run a kubernetes job with our image, prefix with USERNAME and timestamp
 	TS=`date +"%Y%m%d-%H%M%S"` envsubst < proportion_analysis/proportion_job.yml | kubectl create -f -
 
+ecoli:
+	aws s3 cp ecoli_methylation_analysis/run_multiple_sa.sh s3://bailey-k8s/functional_model_analysis/ecoli_methylation/
+	# Run a kubernetes job with our image, prefix with USERNAME and timestamp
+	TS=`date +"%Y%m%d-%H%M%S"` envsubst < ecoli_methylation_analysis/ecoli_job.yml | kubectl create -f -
+
