@@ -18,26 +18,26 @@ from py3helpers.seq_tools import ReferenceHandler, ReverseComplement
 
 
 def main():
-    OUTPUT_DIR = "/home/ubuntu/mount/kmer_counts"
+    OUTPUT_DIR = "/home/ubuntu/ecoli_methylation_analysis/kmer_analysis"
     positions_data = False
     keys = ["contig", "reference_index", "strand"]
     # RNA canonical
-    REFERENCE = "/home/ubuntu/mount/download/RNA_rel2/reference/gencode.v27.transcripts.fa"
-    VARIANT_HOME_DIRS = ["/home/ubuntu/mount/OICR_runs/all_runs/", "/home/ubuntu/mount/UBC_runs/all_runs/"]
-    # VARIANT_HOME_DIRS = ["/home/ubuntu/mount/OICR_runs/test/", "/home/ubuntu/mount/OICR_runs/test/"]
-    VARIANT_NAMES = ["/variant_calls/na12878_OICR_RNA_canonical.csv", "/variant_calls/na12878_UBC_RNA_canonical.csv"]
-    ALPHABET = "ATGC"
-    KMER_LENGTH = 5
-    NAMES = ["OICR", "UBC"]
-
-    # DNA canonical
-    REFERENCE = "/home/ubuntu/bisulfite_methylation_analysis/ref/GRCh38_full_analysis_set_plus_decoy_hla.fa"
-    VARIANT_HOME_DIRS = ["/home/ubuntu/mount/FAB39088_runs/canonical_calling/all_runs/",
-                         "/home/ubuntu/mount/FAF01169_runs/canonical_calling/all_runs/"]
-    VARIANT_NAMES = ["/variant_calls/variant_calls.csv", "/variant_calls/variant_calls.csv"]
-    ALPHABET = "ATGC"
-    KMER_LENGTH = 6
-    NAMES = ["FAB39088_canonical", "FAF01169_canonical"]
+    # REFERENCE = "/home/ubuntu/mount/download/RNA_rel2/reference/gencode.v27.transcripts.fa"
+    # VARIANT_HOME_DIRS = ["/home/ubuntu/mount/OICR_runs/all_runs/", "/home/ubuntu/mount/UBC_runs/all_runs/"]
+    # # VARIANT_HOME_DIRS = ["/home/ubuntu/mount/OICR_runs/test/", "/home/ubuntu/mount/OICR_runs/test/"]
+    # VARIANT_NAMES = ["/variant_calls/na12878_OICR_RNA_canonical.csv", "/variant_calls/na12878_UBC_RNA_canonical.csv"]
+    # ALPHABET = "ATGC"
+    # KMER_LENGTH = 5
+    # NAMES = ["OICR", "UBC"]
+    #
+    # # DNA canonical
+    # REFERENCE = "/home/ubuntu/bisulfite_methylation_analysis/ref/GRCh38_full_analysis_set_plus_decoy_hla.fa"
+    # VARIANT_HOME_DIRS = ["/home/ubuntu/mount/FAB39088_runs/canonical_calling/all_runs/",
+    #                      "/home/ubuntu/mount/FAF01169_runs/canonical_calling/all_runs/"]
+    # VARIANT_NAMES = ["/variant_calls/variant_calls.csv", "/variant_calls/variant_calls.csv"]
+    # ALPHABET = "ATGC"
+    # KMER_LENGTH = 6
+    # NAMES = ["FAB39088_canonical", "FAF01169_canonical"]
 
     # DNA mod
     # REFERENCE = "/home/ubuntu/bisulfite_methylation_analysis/ref/GRCh38_full_analysis_set_plus_decoy_hla.fa"
@@ -50,6 +50,18 @@ def main():
     # POSITIONS_FILE = "/home/ubuntu/bisulfite_methylation_analysis/positions/all_mC.positions"
     # positions_data = pd.read_csv(POSITIONS_FILE, names=["contig", "reference_index", "strand", "find", "replace"],
     #                              sep="\t")
+
+    # ECOLI MOD
+    REFERENCE = "/home/ubuntu/ecoli_methylation_analysis/reference/ecoli.fa"
+    VARIANT_HOME_DIRS = ["/home/ubuntu/ecoli_methylation_analysis/signalalign_output/"]
+    NAMES = ["variant_calls"]
+    VARIANT_NAMES = ["ecoli_dna_baseline_ATCGMQ_sa.model.csv"]
+    ALPHABET = "ATGCM"
+    KMER_LENGTH = 6
+    # POSITIONS_FILE = "/home/ubuntu/ecoli_methylation_analysis/kmer_analysis/all.positions"
+    # positions_data = pd.read_csv(POSITIONS_FILE, names=["contig", "reference_index", "strand", "find", "replace"],
+    #                              sep="\t")
+
     if positions_data is not False:
         i2 = positions_data.set_index(keys).index
 
@@ -129,7 +141,7 @@ def main():
                 total_zeros += 1
         n_files += n_paths
         print("{} Kmers Covered: {}/{}".format(name, len(local_kmers) - total_zeros, len(local_kmers)))
-        print("{} Average coverage: {}".format(name, np.average(list(local_kmers.values())) / n_paths))
+        print("{} Average coverage: {:.4}".format(name, np.sum(list(local_kmers.values())) / (len(local_kmers) - total_zeros)))
         with open(os.path.join(OUTPUT_DIR, name + ".tsv"), 'w') as fh:
             print("\n".join(["\t".join([x, str(y / n_paths)]) for x, y in local_kmers.items()]), file=fh)
 
