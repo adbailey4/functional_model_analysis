@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: andrewbailey-ecoli-baseline-$TS
+  name: andrewbailey-ecoli-0.9-$TS
 spec:
   ttlSecondsAfterFinished: 6000
   template:
@@ -12,11 +12,11 @@ spec:
           image: adbailey4/signalalign@sha256:a350ce89a00e23b96f2224a0ca8fc84e53ba7d44fde2c75331218c73b4833b1a
           env:
             - name: MODELS_BUCKET
-              value: "bailey-k8s/functional_model_analysis/ecoli_methylation_runs/nanopolish_baseline/models/"
+              value: "bailey-k8s/functional_model_analysis/nuc_to_signal_mc_10_14_20/dna_native-5mc_r9.4_native-5mc_run-1/models/0.9/"
             - name: OUTPUT_BUCKET
-              value: "bailey-k8s/functional_model_analysis/ecoli_methylation_runs/nanopolish_baseline/output/"
+              value: "bailey-k8s/functional_model_analysis/ecoli_methylation_runs/kmer_analysis/output/"
             - name: N_THREADS
-              value: "12"
+              value: "24"
           command:
             - /bin/bash
             - -c

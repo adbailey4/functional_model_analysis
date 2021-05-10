@@ -113,7 +113,7 @@ temp_mods.to_csv(output_path, sep="\t", index=False,
 
 * Kmer breakdown
 ```
-/home/ubuntu/functional_model_analysis/src/kmer_breakdown_of_positions_file.py --reference /home/ubuntu/ecoli_methylation_analysis/reference/ecoli.fa --positions_file /home/ubuntu/ecoli_methylation_analysis/kmer_analysis/megalodon.positions --output_dir /home/ubuntu/ecoli_methylation_analysis/kmer_analysis/
+/home/ubuntu/functional_model_analysis/src/kmer_breakdown_of_positions_file.py --reference /home/ubuntu/ecoli_methylation_analysis/reference/ecoli.fa --positions_file /home/ubuntu/ecoli_methylation_analysis/kmer_analysis/final_top_megalodon.positions --output_dir /home/ubuntu/ecoli_methylation_analysis/kmer_analysis/
 
 Number of M kmers: 6144
 Number of found M kmers: 6136
@@ -308,4 +308,77 @@ with open(output_ids, "w") as fh:
     [print(x, file=fh) for x in final_ids]
                 
 ```
+
+### Look into 5mc accuracy
+```
+import pandas as pd
+import numpy as np
+
+variant_calls = "/home/ubuntu/ecoli_methylation_analysis/signalalign_output_2/variant_calls/ecoli_dna_baseline_ATCGMQ_sa.model.csv"
+megalodon_calls = "/home/ubuntu/ecoli_methylation_analysis/output/final_top_megalodon.per_read_modified_base_calls.txt"
+
+vdf = pd.read_csv(variant_calls)
+mdf = pd.read_csv(megalodon_calls, names=["read_id", "contig", "strand", "start", "log_prob2", "log_prob1", "mod"], sep="\t")
+
+vdf["calls"] = ["C" if x else "M" for x in (vdf["prob1"] > vdf["prob2"])]
+mdf["calls"] = ["C" if x else "M" for x in (mdf["log_prob1"] > mdf["log_prob2"])]
+vdf["bools"] = vdf["prob1"] < vdf["prob2"]
+mdf["bools"] = mdf["log_prob1"] < mdf["log_prob2"]
+
+print(len(mdf), len(mdf) / np.sum(mdf["bools"]))
+
+
+read_ids = set(vdf["read_id"])
+delta = 6
+n = 0
+m_correct = []
+m_incorrect = []
+c_correct = []
+c_incorrect = []
+max_p = 0
+for id in read_ids:
+  n += 1
+  calls = vdf[vdf["read_id"] == id]
+  labels = mdf[mdf["read_id"] == id]
+  for i, call in calls.iterrows():
+    label = labels[labels["start"] == call.reference_index].calls
+    if len(label == 1):
+      label = label.iloc[0]
+      max_p = np.max([labels[labels["start"] == call.reference_index].log_prob1.iloc[0], labels[labels["start"] == call.reference_index].log_prob2.iloc[0]]) 
+    else:
+      print("Missing Label")
+      continue
+    if max_p < np.log(0.75):
+      print("Low Confidence")
+      continue
+    n_mod_in_window = np.sum(labels[labels["start"].isin(list(range(call.reference_index-delta, call.reference_index+delta+1)))]["bools"])
+    if label == call.calls:
+      if label == "M":
+        m_correct.append(n_mod_in_window)
+      else:
+        c_correct.append(n_mod_in_window)
+    else:
+      if label == "M":
+        m_incorrect.append(n_mod_in_window)
+      else:
+        c_incorrect.append(n_mod_in_window)
+  if n > 100:
+    break
+
+m_total = np.sum([len(m_incorrect), len(m_correct)])
+c_total = np.sum([len(c_incorrect), len(c_correct)])
+
+print("m_incorrect", len(m_incorrect) / m_total, np.mean(m_incorrect), np.std(m_incorrect))
+print("m_correct", len(m_correct) / m_total, np.mean(m_correct), np.std(m_correct))
+print("c_incorrect", len(c_incorrect) / c_total, np.mean(c_incorrect), np.std(c_incorrect))
+print("c_correct", len(c_correct) / c_total, np.mean(c_correct), np.std(c_correct))
+
+```
+
+* no obvious difference between correct and incorrect mod calls based on the proximity to another modification
+
+
+
+
+
 
